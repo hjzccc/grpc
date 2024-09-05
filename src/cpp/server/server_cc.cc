@@ -419,6 +419,15 @@ class Server::SyncRequest final : public grpc::internal::CompletionQueueTag {
 
   void Run(const std::shared_ptr<GlobalCallbacks>& global_callbacks,
            bool resources) {
+    grpc::string_ref __attribute__((used)) stack_metadata;
+    for (int i=0;i<request_metadata_.count;i++){
+        auto key=StringRefFromSlice(&request_metadata_.metadata[i].key);
+        auto value=StringRefFromSlice(&request_metadata_.metadata[i].value);
+        if(strcmp(key.data(),"stack_metadata")==0){
+            stack_metadata=value;
+            break;
+        }
+    }
     ctx_.Init(deadline_, &request_metadata_);
     wrapped_call_.Init(
         call_, server_, &cq_, server_->max_receive_message_size(),

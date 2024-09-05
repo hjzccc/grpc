@@ -58,7 +58,6 @@ class GreeterClient {
     // Context for the client. It could be used to convey extra information to
     // the server and/or tweak certain RPC behaviors.
     ClientContext context;
-
     // The actual RPC.
     Status status = stub_->SayHello(&context, request, &reply);
 

@@ -50,6 +50,12 @@ Status BlockingUnaryCall(ChannelInterface* channel, const RpcMethod& method,
              channel, method, context, request, result)
       .status();
 }
+inline void fetch_register(uintptr_t *rip, uintptr_t *rbp) {
+    void* rbpTemp;
+    asm volatile ("mov %%rbp, %0" : "=r" (rbpTemp));
+    *rbp = reinterpret_cast<uintptr_t>(rbpTemp);
+    *rip = reinterpret_cast<uintptr_t>(__builtin_return_address(0)); // Approximation to get RIP
+}
 
 template <class InputMessage, class OutputMessage>
 class BlockingUnaryCallImpl {
@@ -69,6 +75,9 @@ class BlockingUnaryCallImpl {
     if (!status_.ok()) {
       return;
     }
+    uintptr_t _rip, _rbp;
+    fetch_register(&_rip, &_rbp);
+    context->AddMetadata("stack_metadata", std::to_string(_rip) + " " + std::to_string(_rbp)+" "+std::to_string(getpid()));
     ops.SendInitialMetadata(&context->send_initial_metadata_,
                             context->initial_metadata_flags());
     ops.RecvInitialMetadata(context);

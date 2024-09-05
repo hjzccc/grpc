@@ -49,6 +49,19 @@ class GreeterServiceImpl final : public Greeter::Service {
   Status SayHello(ServerContext* context, const HelloRequest* request,
                   HelloReply* reply) override {
     std::string prefix("Hello ");
+    const auto& client_metadata = context->client_metadata();
+    for (const auto& pair : client_metadata) {
+      std::string key(pair.first.begin(), pair.first.end());
+      std::string value(pair.second.begin(), pair.second.end());
+      
+      std::cout << "Metadata: " << key << " = " << value << std::endl;
+      
+      // You can now use the key and value as needed
+      if (key == "some-specific-key") {
+        // Do something with the value
+      }
+    }
+    std::cout<<prefix + request->name()<<std::endl;
     reply->set_message(prefix + request->name());
     return Status::OK;
   }
@@ -76,6 +89,7 @@ void RunServer(uint16_t port) {
 }
 
 int main(int argc, char** argv) {
+  std::cout<<getpid()<<std::endl;
   absl::ParseCommandLine(argc, argv);
   RunServer(absl::GetFlag(FLAGS_port));
   return 0;
